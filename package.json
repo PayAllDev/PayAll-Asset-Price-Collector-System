@@ -1,6 +1,6 @@
 {
   "name": "payall-system-crypto-prices-collector-system",
-  "version": "2.0.0",
+  "version": "2.2.0",
   "description": "This system will obtain the current data of Assets as Cryptocurrencies and Currencies, once the system get the data, this will be saved in multiple places as Current Price, Historial Price and  Higher and Lower Price",
   "main": "index.js",
   "scripts": {

@@ -1,4 +1,4 @@
-# Crypto Prices Collector System
+# PayAll System Assets Data Collector System
 
 Resumen:
 Este Script Obtendra multiples datos de las criptomonedas y las guardara en la base de datos.
@@ -15,10 +15,10 @@ Bitcoin Ethereum Ripple Litecoin Bitcoin-Cash Dogecoin Cardano Monero Shiba-Inu 
 
 Los datos que obtendrá son:
 
-	•	Precio actual en peso mexicano (MXN)
-	•	Volumen de las últimas 24 horas
-	•	Capitalización en Mercado
-	•	Cambio de las últimas 24 horas
+    •Precio actual en peso mexicano (MXN)
+	•Volumen de las últimas 24 horas
+	•Capitalización en Mercado
+	•Cambio de las últimas 24 horas
 
 Adicionalmente comparara los precios actuales con los precios mas bajos y altos para guardarlos en la base de datos.
 
