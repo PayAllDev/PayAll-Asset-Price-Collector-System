@@ -18,4 +18,4 @@ const cheerio = require('cheerio')
 
 console.log("Se ha llamado a GetAssetsEnable")
 
-SF.loadPayAllSystem()
+SF.LoadPayAllSystem()

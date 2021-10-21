@@ -16,7 +16,7 @@ const admin = require("firebase-admin");
 let CryptoEnableISOCode, CryptoEnableName, CurrencyEnableISOCode, CurrencyEnableName, CryptoEnableID
 let UserSystemTest = 'askdjalskdjas'
 
-function LoadPayAllSystem(){
+function LoadPayAllSystem() {
 
     ShowNotification('Enter', 'Enter')
     ShowNotification('Enter', 'Enter')
@@ -31,18 +31,25 @@ function LoadPayAllSystem(){
     ShowNotification('Enter', 'Enter')
     ShowNotification('SystemTitleStyle', " ****************** Initializing Global Functions")
     SetFirebaseConexion()
+    .then((state) => {
+        ShowNotification('Normal', "  ^- " + state)
+        GetAssetsEnable('Init')
+    })
     initClock('Init')
-    GetAssetsEnable('Init')
     //InitPayAllSystem()
 
 }
 
 function SetFirebaseConexion() {
 
-    var serviceAccount = require("./pa_sdk_key.json");
-    admin.initializeApp({ credential: admin.credential.cert(serviceAccount), databaseURL: "https://payall-p404-default-rtdb.firebaseio.com" });
-    db = admin.database();
-    ShowNotification('Normal', "  ^- The firebase conecction has been crated succesfully")
+    return new Promise((resolve,reject) => {
+
+        var serviceAccount = require("./pa_sdk_key.json");
+        admin.initializeApp({ credential: admin.credential.cert(serviceAccount), databaseURL: "https://payall-p404-default-rtdb.firebaseio.com" });
+        db = admin.database();
+        resolve('The firebase conecction has been crated succesfully')
+
+    })    
 
 }
 
@@ -64,7 +71,7 @@ function initClock(State) {
         ShowNotification('Normal', "  ^- The clock has been initialized successfully at: " + TodayHours + ':' + TodayMinutes + ':' + TodaySeconds)
     }
 
-    if(TodayHours == 23 && TodayMinutes == 59 && TodaySeconds == 59){
+    if (TodayHours == 23 && TodayMinutes == 59 && TodaySeconds == 59) {
 
 
         let LowerPricesOBJ = {};
@@ -73,8 +80,45 @@ function initClock(State) {
         ShowNotification('Normal', "  ^- The highest and lowest price have been reset at: " + TodayHours + ':' + TodayMinutes + ':' + TodaySeconds)
 
     }
-    
+
     setTimeout(initClock, 1000);
+
+}
+
+function GetAssetsEnable2(State) {
+
+    return new Promise((resolve, reject) => {
+
+        let GlobalDataRef = db.ref('System/GlobalData/ActiveElements')
+
+        GlobalDataRef.on('value', (snapshot) => {
+
+            if (snapshot.val() != null) {
+
+                ActiveElementsResponse = snapshot.val()
+
+                CryptoEnableISOCode = ActiveElementsResponse.CryptosEnableISOCode.split(',')
+                CryptoEnableName = ActiveElementsResponse.CryptosEnableName.split(',')
+
+                CurrencyEnableISOCode = ActiveElementsResponse.CurrencysEnableISOCode.split(',')
+                CurrencyEnableName = ActiveElementsResponse.CurrencysEnableName.split(',')
+
+                CryptoEnableID = ActiveElementsResponse.CryptoEnableID.split(',')
+
+                if (State == 'Init') {
+                    ShowNotification('Normal', "  ^- The Enable Crypto´s ISO Code has been loaded succesfully: " + CryptoEnableISOCode.toString())
+                    ShowNotification('Normal', "  ^- The Enable Crypto´s ID has been loaded succesfully: " + CryptoEnableID.toString())
+                    ShowNotification('Normal', "  ^- The Enable Currency´s ISO Code has been loaded succesfully: " + CurrencyEnableISOCode.toString())
+                }
+
+            }
+
+        }, (errorObject) => {
+
+            reject(new Error('Could not get firebase current assets enable'))
+
+        });
+    })
 
 }
 
@@ -168,13 +212,14 @@ function SetCompleteNumber(number) {
 }
 
 module.exports = {
-    "loadPayAllSystem": LoadPayAllSystem,
-    "showNotification": ShowNotification,    
-    "CryptoEnableISOCode":CryptoEnableISOCode,
-    "UserSystemTest":UserSystemTest,
+    "LoadPayAllSystem": LoadPayAllSystem,
+    "showNotification": ShowNotification,
+    "CryptoEnableISOCode": CryptoEnableISOCode,
+    "UserSystemTest": UserSystemTest,
     "CryptoEnableName": CryptoEnableName,
     "CurrencyEnableISOCode": CurrencyEnableISOCode,
     "CurrencyEnableName": CurrencyEnableName,
     "CryptoEnableID": CryptoEnableID,
-    "UserSystemTest": UserSystemTest
+    "UserSystemTest": UserSystemTest,
+    "GetAssetsEnable2": GetAssetsEnable2
 }
