@@ -11,56 +11,59 @@
 */
 
 const SF = require('./SharedFunctions')
-const chalk = require('chalk');
 const admin = require("firebase-admin");
 const CoinGecko = require('coingecko-api');
 const CoinGeckoClient = new CoinGecko();
 const request = require('request-promise')
-const cheerio = require('cheerio')
+const cheerio = require('cheerio');
+const { ShowNotification } = require('./SharedFunctions');
 
 let CryptoEnableISOCode, CryptoEnableName, CurrencyEnableISOCode, CurrencyEnableName, CryptoEnableID
 
+let LowerPricesOBJ = {};
+let HigherPricesOBJ = {};
+
 function LoadPayAllSystem() {
 
-    ShowNotification('Enter', 'Enter')
-    ShowNotification('Enter', 'Enter')
-    ShowNotification('SystemStyle', "██████╗  █████╗ ██╗   ██╗ █████╗ ██╗     ██╗     ")
-    ShowNotification('SystemStyle', "██╔══██╗██╔══██╗╚██╗ ██╔╝██╔══██╗██║     ██║     ")
-    ShowNotification('SystemStyle', "██████╔╝███████║ ╚████╔╝ ███████║██║     ██║     ")
-    ShowNotification('SystemStyle', "██╔═══╝ ██╔══██║  ╚██╔╝  ██╔══██║██║     ██║     ")
-    ShowNotification('SystemStyle', "██║     ██║  ██║   ██║   ██║  ██║███████╗███████╗")
-    ShowNotification('SystemStyle', "╚═╝     ╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝╚══════╝╚══════╝")
-    ShowNotification('Enter', 'Enter')
-    ShowNotification('SystemStyle', "Payall System Crypto Prices Collector System - Version: 2.2.0 ( ^^^^ )")
-    ShowNotification('Enter', 'Enter')
-    ShowNotification('SystemTitleStyle', " ****************** Initializing Global Functions")
+    SF.ShowNotification('Enter', 'Enter')
+    SF.ShowNotification('Enter', 'Enter')
+    SF.ShowNotification('SystemStyle', "██████╗  █████╗ ██╗   ██╗ █████╗ ██╗     ██╗     ")
+    SF.ShowNotification('SystemStyle', "██╔══██╗██╔══██╗╚██╗ ██╔╝██╔══██╗██║     ██║     ")
+    SF.ShowNotification('SystemStyle', "██████╔╝███████║ ╚████╔╝ ███████║██║     ██║     ")
+    SF.ShowNotification('SystemStyle', "██╔═══╝ ██╔══██║  ╚██╔╝  ██╔══██║██║     ██║     ")
+    SF.ShowNotification('SystemStyle', "██║     ██║  ██║   ██║   ██║  ██║███████╗███████╗")
+    SF.ShowNotification('SystemStyle', "╚═╝     ╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝╚══════╝╚══════╝")
+    SF.ShowNotification('Enter', 'Enter')
+    SF.ShowNotification('SystemStyle', "Payall System Crypto Prices Collector System - Version: 2.2.0 ( ^^^^ )")
+    SF.ShowNotification('Enter', 'Enter')
+    SF.ShowNotification('SystemTitleStyle', " ****************** Initializing Global Functions")
 
     initClock('Init')
     SetFirebaseConexion()
         .then((state) => {
-            ShowNotification('Normal', "  ^- " + state)
+            SF.ShowNotification('Normal', "  ^- " + state)
             GetAssetsEnable()
                 .then((state) => {
 
                     if (state == 'Enable Assets has been loaded correctly') {
 
-                        ShowNotification('Normal', "  ^- The Enable Crypto´s ISO Code has been loaded succesfully: " + CryptoEnableISOCode.toString())
-                        ShowNotification('Normal', "  ^- The Enable Crypto´s ID has been loaded succesfully: " + CryptoEnableID.toString())
-                        ShowNotification('Normal', "  ^- The Enable Currency´s ISO Code has been loaded succesfully: " + CurrencyEnableISOCode.toString())
+                        SF.ShowNotification('Normal', "  ^- The Enable Crypto´s ISO Code has been loaded succesfully: " + CryptoEnableISOCode.toString())
+                        SF.ShowNotification('Normal', "  ^- The Enable Crypto´s ID has been loaded succesfully: " + CryptoEnableID.toString())
+                        SF.ShowNotification('Normal', "  ^- The Enable Currency´s ISO Code has been loaded succesfully: " + CurrencyEnableISOCode.toString())
 
-                        ShowNotification('SystemTitleStyle', " ****************** Initializing PayAll System")
+                        SF.ShowNotification('SystemTitleStyle', " ****************** Initializing PayAll System")
 
                         CheckConnectionCoinGeckoClient()
                             .then((ServerConnectionState) => {
 
                                 if (ServerConnectionState == 'The connection to CoinGeckoClient is created') {
-                                    ShowNotification('Normal', "  ^- " + ServerConnectionState)
+                                    SF.ShowNotification('Normal', "  ^- " + ServerConnectionState)
                                     GetCryptoData()
 
                                 }
 
                                 if (ServerConnectionState == 'CoinGeckoClients has not responded') {
-                                    ShowNotification('Normal', "  ^- " + ServerConnectionState)
+                                    SF.ShowNotification('Normal', "  ^- " + ServerConnectionState)
                                     TryCoingeckoClientConnectionAgain()
 
                                 }
@@ -85,11 +88,11 @@ function initClock(State) {
     TodayMinutes = ClockDate.getMinutes()
     TodaySeconds = ClockDate.getSeconds()
 
-    TodayMonth = SetCompleteNumber(TodayMonth)
-    TodayDay = SetCompleteNumber(TodayDay)
+    TodayMonth = SF.SetCompleteNumber(TodayMonth)
+    TodayDay = SF.SetCompleteNumber(TodayDay)
 
     if (State == 'Init') {
-        ShowNotification('Normal', "  ^- The clock has been initialized successfully at: " + TodayHours + ':' + TodayMinutes + ':' + TodaySeconds)
+        SF.ShowNotification('Normal', "  ^- The clock has been initialized successfully at: " + TodayHours + ':' + TodayMinutes + ':' + TodaySeconds)
     }
 
     if (TodayHours == 23 && TodayMinutes == 59 && TodaySeconds == 59) {
@@ -98,7 +101,7 @@ function initClock(State) {
         let LowerPricesOBJ = {};
         let HigherPricesOBJ = {};
         saveNewHLPrice()
-        ShowNotification('Normal', "  ^- The highest and lowest price have been reset at: " + TodayHours + ':' + TodayMinutes + ':' + TodaySeconds)
+        SF.ShowNotification('Normal', "  ^- The highest and lowest price have been reset at: " + TodayHours + ':' + TodayMinutes + ':' + TodaySeconds)
 
     }
 
@@ -117,7 +120,8 @@ function SetFirebaseConexion() {
     return new Promise((resolve, reject) => {
 
         var serviceAccount = require("./pa_sdk_key.json");
-        admin.initializeApp({ credential: admin.credential.cert(serviceAccount), databaseURL: "https://payall-p404-default-rtdb.firebaseio.com" });
+        //admin.initializeApp({ credential: admin.credential.cert(serviceAccount), databaseURL: "https://payall-p404-default-rtdb.firebaseio.com" });
+        admin.initializeApp({ credential: admin.credential.cert(serviceAccount), databaseURL: "https://payall-p404-dev-default-rtdb.firebaseio.com/" });
         db = admin.database();
         resolve('The firebase conecction has been crated succesfully')
 
@@ -159,60 +163,6 @@ function GetAssetsEnable() {
 
 }
 
-function ShowNotification(Style, Message) {
-
-    if (Style == null || Message == null) return
-
-    switch (Style) {
-
-        case "SystemStyle":
-            console.log(chalk.cyan(Message))
-            break
-
-        case "SystemTitleStyle":
-            console.log(chalk.yellowBright(Message))
-            break
-
-        case "Enter":
-            console.log("")
-            break
-
-        case "Normal":
-            console.log(chalk.whiteBright(Message))
-            break
-
-        case "NormalUpdate":
-            console.log(chalk.white(" [" + TodayHours + ":" + TodayMinutes + ":" + TodaySeconds + "] SYSTEM-UPDATE:" + Message))
-            break
-
-        case "DBSaveUpdate":
-            console.log(chalk.green(" [" + TodayHours + ":" + TodayMinutes + ":" + TodaySeconds + "] SYSTEM-UPDATE:" + Message))
-            break
-
-        case "ERROR":
-            console.log(chalk.red(" [" + TodayHours + ":" + TodayMinutes + ":" + TodaySeconds + "] SYSTEM-UPDATE:" + Message))
-            break
-
-    }
-}
-
-function SetCompleteNumber(number) {
-
-    let numberComplete
-
-    if (number.toString().length == 1) {
-
-        numberComplete = '0' + number.toString()
-
-    } else {
-        numberComplete = number.toString()
-    }
-
-    return numberComplete
-
-
-}
-
 var CheckConnectionCoinGeckoClient = async () => {
 
     let ServerResponse = await CoinGeckoClient.ping();
@@ -248,8 +198,19 @@ var GetCryptoData = async () => {
             const CurrentElement24Vol = CurrentElementDataResponse['mxn_24h_vol']
             const CurrentElement24Change = CurrentElementDataResponse['mxn_24h_change']
 
-            PriceComparator(CurrentElementISOCode, CurrentElementPrice)
+            try{
+
+                let ResultsPricesAnalyzed = await SF.AnalyzePrices(CurrentElementISOCode, CurrentElementPrice)
+                console.log(ResultsPricesAnalyzed)
+
+            }catch (Error){
+                ShowNotification('ERROR', 'Un error ha ocurrido: ' + Error)
+            }
+
+            
+            /*AnalyzeAndSaveHigherPrice(CurrentElementISOCode, CurrentElementPrice)
                 .then((FState) => {
+
                     SaveCurrentHLPrice(CurrentElementISOCode, CurrentElementHigherPrice, CurrentElementLowerPrice)
                         .then((FState) => {
                             SaveCurrentPrice(CurrentElementISOCode, CurrentElementPrice)
@@ -260,36 +221,36 @@ var GetCryptoData = async () => {
                                                 .then((Fstate) => {
                                                     SaveCurrentChange(CurrentElementISOCode, CurrentElement24Change)
                                                         .then((Fstate) => {
-                                                            ShowNotification('Normal', CurrencyEnableISOCode + ' Data has been updated Correctly')
-                                                            ShowNotification('Enter', 'Enter')
+                                                            SF.ShowNotification('Normal', CurrencyEnableISOCode + ' Data has been updated Correctly')
+                                                            SF.ShowNotification('Enter', 'Enter')
 
                                                         })
                                                 })
                                         })
                                 })
                         })
-
                 })
 
-            ShowNotification('Enter', 'Enter')
+
+            SF.ShowNotification('Enter', 'Enter')
             console.log('Current Element in Process: ' + CurrentElementID)
             console.log('Current Element in Process: ' + CurrentElementName)
             console.log('Current Element in Process: ' + CurrentElementISOCode)
-            ShowNotification('Enter', 'Enter')
+            SF.ShowNotification('Enter', 'Enter')
             console.log(CurrentElementPrice)
             console.log(CurrentElementMarketCap)
             console.log(CurrentElement24Vol)
             console.log(CurrentElement24Change)
 
-
+*/
 
         }
 
         /*if (ServerResponse.data != null) {
 
-            ShowNotification('Enter', "")
-            ShowNotification('Normal', "  ^- The data has been obtained successfully ")
-            ShowNotification("Enter", "")
+            SF.ShowNotification('Enter', "")
+            SF.ShowNotification('Normal', "  ^- The data has been obtained successfully ")
+            SF.ShowNotification("Enter", "")
 
             for (let i = 0; i < ServerResponseDataKey.length; i++) {
 
@@ -350,7 +311,7 @@ var GetCryptoData = async () => {
         setTimeout(GetAgain, 3000);*/
 
     } catch (error) {
-        ShowNotification('Error', error)
+        SF.ShowNotification('Error', error)
     }
 
 }
