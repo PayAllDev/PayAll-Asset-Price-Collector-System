@@ -37,16 +37,16 @@ function ShowNotification(Style, Message) {
             console.log(chalk.whiteBright(Message))
             break
 
-        case "NormalUpdate":
-            console.log(chalk.white(" [" + TodayHours + ":" + TodayMinutes + ":" + TodaySeconds + "] SYSTEM-UPDATE:" + Message))
+        case "NormalUpdateCoinGeck":
+            console.log(chalk.yellow("  ^- [" + TodayHours + ":" + TodayMinutes + ":" + TodaySeconds + "] COINGECKOCLIENT-UPDATE:" + Message))
             break
 
         case "DBSaveUpdate":
-            console.log(chalk.white("[" + TodayHours + ":" + TodayMinutes + ":" + TodaySeconds + "]") + chalk.green(" SYSTEM-UPDATE: ") + chalk.white(Message))
+            console.log(chalk.white("  ^- [" + TodayHours + ":" + TodayMinutes + ":" + TodaySeconds + "]") + chalk.green(" SYSTEM-UPDATE:") + chalk.white(Message))
             break
 
         case "ERROR":
-            console.log(chalk.red(" [" + TodayHours + ":" + TodayMinutes + ":" + TodaySeconds + "] SYSTEM-UPDATE:" + Message))
+            console.log(chalk.red("  ^-  [" + TodayHours + ":" + TodayMinutes + ":" + TodaySeconds + "] SYSTEM-UPDATE:" + Message))
             break
 
     }
@@ -77,38 +77,33 @@ async function AnalyzePrices(CurrentElementISOCode, CurrentElementPrice) {
     LastHigherPrices = HigherPricesOBJ[CurrentElementISOCode]
     LastLowerPrices = LowerPricesOBJ[CurrentElementISOCode]
 
-    ShowNotification('Enter','Enter')
-    console.log(CurrentElementISOCode)
-
     if (LastHigherPrices == null) {
-        
+
         LastHigherPrices = await GetLastHLPrice(CurrentElementISOCode, 'HigherPrice')
 
     }
 
-    if(LastLowerPrices == null) {
+    if (LastLowerPrices == null) {
 
         LastLowerPrices = await GetLastHLPrice(CurrentElementISOCode, 'LowerPrice')
 
     }
 
-    console.log('AnalyzePricesDB: ' + LastHigherPrices)
-    console.log('AnalyzePricesDB: ' + LastLowerPrices)
-
-    if(LastHigherPrices != 'Empty' && CurrentElementPrice > LastHigherPrices){
+    if (LastHigherPrices != 'Empty' && CurrentElementPrice > LastHigherPrices) {
+        LastHigherPrices = CurrentElementPrice
+    } else if (LastHigherPrices == 'Empty') {
         LastHigherPrices = CurrentElementPrice
     }
 
-    if(LastLowerPrices != 'Empty' && CurrentElementPrice < LastLowerPrices){
+    if (LastLowerPrices != 'Empty' && CurrentElementPrice < LastLowerPrices) {
+        LastLowerPrices = CurrentElementPrice
+    } else if (LastLowerPrices == 'Empty') {
         LastLowerPrices = CurrentElementPrice
     }
 
-    console.log('AnalyzePricesAnalyzed: ' + LastHigherPrices)
-    console.log('AnalyzePricesAnalyzed: ' + LastLowerPrices)
+    return new Promise((resolver, reject) => {
+        resolver(LastHigherPrices + ',' + LastLowerPrices)
 
-    return new Promise((resolver,reject) => {
-        resolver('termina')
-        
     })
 
 }
@@ -123,10 +118,14 @@ function GetLastHLPrice(CurrentElementISOCode, CurrentElementType) {
 
             if (data.val() != null) {
 
-                if(data.val() != ''){
+                if (data.val() != '') {
+
                     resolver(data.val())
-                }else{
-                    resolver('Empty')    
+
+                } else {
+
+                    resolver('Empty')
+
                 }
 
             } else {
@@ -139,10 +138,50 @@ function GetLastHLPrice(CurrentElementISOCode, CurrentElementType) {
 
 }
 
+function UpdateDBData(CurrentElementISOCode, CurrentElementPrice, CurrentPathtoSave) {
+
+    return new Promise((resolve, reject) => {
+
+        if (CurrentElementISOCode == null || CurrentElementPrice == null || CurrentPathtoSave == null) reject('The data has been losted')
+
+        let DBRefToUpdate = db.ref('System/RealtimeData/Crypto/MXN/' + CurrentPathtoSave + '/')
+        let DBRefToUpdateCheck = db.ref('System/RealtimeData/Crypto/MXN/' + CurrentPathtoSave + '/' + CurrentElementISOCode)
+
+        DBRefToUpdate.update({ [CurrentElementISOCode]: parseFloat(CurrentElementPrice) });
+
+        DBRefToUpdateCheck.once('value', (data) => {
+
+            let GlobalDataStateRef = db.ref('System/RealtimeStatus/Crypto/MXN/' + CurrentPathtoSave + '/' + CurrentElementISOCode)
+
+            if (data.val() != null && data.val() == CurrentElementPrice) {
+
+                GlobalDataStateRef.update({ [CurrentElementISOCode]: 'Enable' });
+                resolve('Success')
+
+            } else if (data.val() != null && data.val() != CurrentElementPrice) {
+
+                GlobalDataStateRef.update({ [CurrentElementISOCode]: 'UsingLast' });
+                resolve('Error')    
+
+
+            } else if (data.val() == null || data.val() == "") {
+
+                GlobalDataStateRef.update({ [CurrentElementISOCode]: 'Disble' });
+                resolve('Error')
+
+            }
+
+
+        });
+
+    })
+}
+
 module.exports = {
 
     "ShowNotification": ShowNotification,
     "SetCompleteNumber": SetCompleteNumber,
-    "AnalyzePrices": AnalyzePrices
+    "AnalyzePrices": AnalyzePrices,
+    "UpdateDBData": UpdateDBData
 
 }

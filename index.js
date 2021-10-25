@@ -183,132 +183,154 @@ var GetCryptoData = async () => {
 
         let ServerResponse = await CoinGeckoClient.simple.price({ ids: CryptoEnableID, vs_currencies: ['mxn'], include_24hr_vol: ['true'], include_market_cap: ['true'], include_24hr_change: [true] });
 
-        let ServerResponseData = ServerResponse.data
+        if (ServerResponse != '' || null) {
 
-        for (let i = 0; i < CryptoEnableID.length; i++) {
+            ShowNotification('Enter', 'Space between Last and CUrrent CoinGeckoClient Response')
+            ShowNotification('NormalUpdateCoinGeck', 'CoinGecko Client Response has responded correctly')
 
-            const CurrentElementID = CryptoEnableID[i]
-            const CurrentElementPosition = CryptoEnableID.indexOf(CurrentElementID)
-            const CurrentElementName = CryptoEnableName[CurrentElementPosition]
-            const CurrentElementISOCode = CryptoEnableISOCode[CurrentElementPosition]
+            let ServerResponseData = ServerResponse.data
 
-            const CurrentElementDataResponse = ServerResponseData[[CurrentElementID]]
-            const CurrentElementPrice = CurrentElementDataResponse['mxn']
-            const CurrentElementMarketCap = CurrentElementDataResponse['mxn_market_cap']
-            const CurrentElement24Vol = CurrentElementDataResponse['mxn_24h_vol']
-            const CurrentElement24Change = CurrentElementDataResponse['mxn_24h_change']
+            for (let i = 0; i < CryptoEnableID.length; i++) {
 
-            try{
+                const CurrentElementID = CryptoEnableID[i]
+                const CurrentElementPosition = CryptoEnableID.indexOf(CurrentElementID)
+                const CurrentElementName = CryptoEnableName[CurrentElementPosition]
+                const CurrentElementISOCode = CryptoEnableISOCode[CurrentElementPosition]
 
-                let ResultsPricesAnalyzed = await SF.AnalyzePrices(CurrentElementISOCode, CurrentElementPrice)
-                console.log(ResultsPricesAnalyzed)
+                const CurrentElementDataResponse = ServerResponseData[[CurrentElementID]]
+                const CurrentElementPrice = CurrentElementDataResponse['mxn']
+                const CurrentElementMarketCap = CurrentElementDataResponse['mxn_market_cap']
+                const CurrentElement24Vol = CurrentElementDataResponse['mxn_24h_vol']
+                const CurrentElement24Change = CurrentElementDataResponse['mxn_24h_change']
 
-            }catch (Error){
-                ShowNotification('ERROR', 'Un error ha ocurrido: ' + Error)
-            }
+                try {
 
-            
-            /*AnalyzeAndSaveHigherPrice(CurrentElementISOCode, CurrentElementPrice)
-                .then((FState) => {
+                    let ResultsPricesAnalyzed = await SF.AnalyzePrices(CurrentElementISOCode, CurrentElementPrice)
 
-                    SaveCurrentHLPrice(CurrentElementISOCode, CurrentElementHigherPrice, CurrentElementLowerPrice)
-                        .then((FState) => {
-                            SaveCurrentPrice(CurrentElementISOCode, CurrentElementPrice)
-                                .then((Fstate) => {
-                                    SaveCurrentMarketCap(CurrentElementISOCode, CurrentElementMarketCap)
-                                        .then((Fstate) => {
-                                            SaveCurrentVol(CurrentElementISOCode, CurrentElement24Vol)
-                                                .then((Fstate) => {
-                                                    SaveCurrentChange(CurrentElementISOCode, CurrentElement24Change)
-                                                        .then((Fstate) => {
-                                                            SF.ShowNotification('Normal', CurrencyEnableISOCode + ' Data has been updated Correctly')
-                                                            SF.ShowNotification('Enter', 'Enter')
+                    HigherPricesAA = ResultsPricesAnalyzed.split(',')[0]
+                    LowerPricesAA = ResultsPricesAnalyzed.split(',')[1]
 
-                                                        })
-                                                })
-                                        })
-                                })
-                        })
-                })
+                    //We save the result after analize in Local OBJ
+
+                    Object.defineProperty(HigherPricesOBJ, CurrentElementISOCode, { value: HigherPricesAA, writable: true, enumerable: true })
+                    Object.defineProperty(LowerPricesOBJ, CurrentElementISOCode, { value: LowerPricesAA, writable: true, enumerable: true })
+
+                    //Now we save the Current Price then
+
+                    SF.UpdateDBData(CurrentElementISOCode, CurrentElementPrice, 'Price').then((response) => {
+
+                        if (response == 'Success') {
+
+                            ShowNotification('DBSaveUpdate', ' The ' + CurrentElementISOCode + ' Price has been uptaded sucessfully')
+
+                        } else if (response == 'Error') {
+
+                            ShowNotification('ERROR', ' ERROR with ' + CurrentElementISOCode + ' Price has not been uptaded sucessfully')
+
+                        }
+
+                    })
+
+                    //The Higher Price then
+
+                    SF.UpdateDBData(CurrentElementISOCode, HigherPricesAA, 'HigherPrice').then((response) => {
+
+                        if (response == 'Success') {
+
+                            ShowNotification('DBSaveUpdate', ' The ' + CurrentElementISOCode + ' HigherPrice has been uptaded sucessfully')
+
+                        } else if (response == 'Error') {
+
+                            ShowNotification('ERROR', ' ERROR with ' + CurrentElementISOCode + ' HigherPrice has not been uptaded sucessfully')
+
+                        }
+
+                    })
+
+                    //The Lower Price then
+
+                    SF.UpdateDBData(CurrentElementISOCode, LowerPricesAA, 'LowerPrice').then((response) => {
+
+                        if (response == 'Success') {
+
+                            ShowNotification('DBSaveUpdate', ' The ' + CurrentElementISOCode + ' LowerPrice has been uptaded sucessfully')
+
+                        } else if (response == 'Error') {
+
+                            ShowNotification('ERROR', ' ERROR with ' + CurrentElementISOCode + ' LowerPrice has not been uptaded sucessfully')
+
+                        }
+
+                    })
+
+                    //The 24 Change Price then
+
+                    SF.UpdateDBData(CurrentElementISOCode, CurrentElement24Change, 'Change').then((response) => {
+
+                        if (response == 'Success') {
+
+                            ShowNotification('DBSaveUpdate', ' The ' + CurrentElementISOCode + ' Change has been uptaded sucessfully')
+
+                        } else if (response == 'Error') {
+
+                            ShowNotification('ERROR', ' ERROR with ' + CurrentElementISOCode + ' Change has not been uptaded sucessfully')
+
+                        }
+
+                    })
+
+                    //The MarketCap Price then
+
+                    SF.UpdateDBData(CurrentElementISOCode, CurrentElementMarketCap, 'MarketCap').then((response) => {
+
+                        if (response == 'Success') {
+
+                            ShowNotification('DBSaveUpdate', ' The ' + CurrentElementISOCode + ' MarketCap has been uptaded sucessfully')
+
+                        } else if (response == 'Error') {
+
+                            ShowNotification('ERROR', ' ERROR with ' + CurrentElementISOCode + ' MarketCap has not been uptaded sucessfully')
+
+                        }
+
+                    })
+
+                    //The 24 Volumen then
+
+                    SF.UpdateDBData(CurrentElementISOCode, CurrentElement24Vol, 'Volumen').then((response) => {
+
+                        if (response == 'Success') {
+
+                            ShowNotification('DBSaveUpdate', ' The ' + CurrentElementISOCode + ' Volumen has been uptaded sucessfully')
+
+                        } else if (response == 'Error') {
+
+                            ShowNotification('ERROR', ' ERROR with ' + CurrentElementISOCode + ' Volumen has not been uptaded sucessfully')
+
+                        }
+
+                    })
+
+                    //The Historial Data
+
+                    ShowNotification('Enter', 'Space between CryptoCurrencies')
 
 
-            SF.ShowNotification('Enter', 'Enter')
-            console.log('Current Element in Process: ' + CurrentElementID)
-            console.log('Current Element in Process: ' + CurrentElementName)
-            console.log('Current Element in Process: ' + CurrentElementISOCode)
-            SF.ShowNotification('Enter', 'Enter')
-            console.log(CurrentElementPrice)
-            console.log(CurrentElementMarketCap)
-            console.log(CurrentElement24Vol)
-            console.log(CurrentElement24Change)
+                } catch (Error) {
 
-*/
-
-        }
-
-        /*if (ServerResponse.data != null) {
-
-            SF.ShowNotification('Enter', "")
-            SF.ShowNotification('Normal', "  ^- The data has been obtained successfully ")
-            SF.ShowNotification("Enter", "")
-
-            for (let i = 0; i < ServerResponseDataKey.length; i++) {
-
-                ElementInProcces = ServerResponseDataKey[i]
-
-                if (ElementInProcces.includes('-')) {
-
-                    ElementInProccesSep = ElementInProcces.split('-')
-                    ElementInProccesSepClean = ""
-                    LastWord = ""
-
-                    for (let x = 0; x <= ElementInProccesSep.length - 1; x++) {
-
-                        CurrentWord = ElementInProccesSep[x].charAt(0).toUpperCase() + ElementInProccesSep[x].slice(1)
-                        ElementInProccesClean = LastWord + " " + CurrentWord
-                        LastWord = CurrentWord
-
-                    }
-
-                    if (ElementInProcces == 'true-usd') {
-                        ElementInProccesClean = 'TrueUSD'
-
-                    }
-
-                    ElementInProccesISDCodeIndex = CryptoEnableName.indexOf(ElementInProccesClean)
-                    ElementInProccesISDCode = CryptoEnableISOCode[ElementInProccesISDCodeIndex]
-
-                } else {
-
-                    if (ElementInProcces == 'ripple') {
-                        ElementInProccesClean = 'RippleX'
-                    } else {
-                        ElementInProccesClean = ElementInProcces.charAt(0).toUpperCase() + ElementInProcces.slice(1)
-                    }
-
-                    ElementInProccesISDCodeIndex = CryptoEnableName.indexOf(ElementInProccesClean)
-                    ElementInProccesISDCode = CryptoEnableISOCode[ElementInProccesISDCodeIndex]
-
+                    ShowNotification('ERROR', 'CoinGeckoClient ERROR: ' + Error)
 
                 }
 
-                ElementDataInProcces = ServerResponseDataValues[i]
-                ElementInProccesCurrentPrice = ElementDataInProcces.mxn
-                ElementInProccesMarketCap = ElementDataInProcces.mxn_market_cap
-                ElementInProccesVolumen24 = ElementDataInProcces.mxn_24h_vol
-                ElementInProccesChange24 = ElementDataInProcces.mxn_24h_change
-
-                savePriceRT(ElementInProccesISDCode,ElementInProccesCurrentPrice)                
-                InitPriceComparator(ElementInProccesISDCode, ElementInProccesCurrentPrice)
-                saveMarketCapRT(ElementInProccesISDCode,ElementInProccesMarketCap)                    
-                saveVolCapRT(ElementInProccesISDCode,ElementInProccesVolumen24)
-                savePriceChange(ElementInProccesISDCode,ElementInProccesChange24)
-
             }
+
+        }else{
+
+            SF.ShowNotification('Error', 'CoinGeckoClient Response is NULL')    
 
         }
 
-        setTimeout(GetAgain, 3000);*/
+        //setTimeout(GetAgain, 3000);
 
     } catch (error) {
         SF.ShowNotification('Error', error)
