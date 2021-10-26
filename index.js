@@ -158,8 +158,7 @@ function SetFirebaseConexion() {
     return new Promise((resolve, reject) => {
 
         var serviceAccount = require("./pa_sdk_key.json");
-        //admin.initializeApp({ credential: admin.credential.cert(serviceAccount), databaseURL: "https://payall-p404-default-rtdb.firebaseio.com" });
-        admin.initializeApp({ credential: admin.credential.cert(serviceAccount), databaseURL: "https://payall-p404-dev-default-rtdb.firebaseio.com/" });
+        admin.initializeApp({ credential: admin.credential.cert(serviceAccount), databaseURL: "https://payall-p404-default-rtdb.firebaseio.com" });
         db = admin.database();
         resolve('The firebase conecction has been crated succesfully')
 
