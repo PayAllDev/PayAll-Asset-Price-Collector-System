@@ -10,12 +10,16 @@
 
 */
 
-const chalk = require('chalk');
-
 let LowerPricesOBJ = {};
 let HigherPricesOBJ = {};
+let HistorialDayState = {};
+let MonthsName = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
+const chalk = require('chalk');
 
 function ShowNotification(Style, Message) {
+
+    //This function set Colors for multiple Notification depending on his state
 
     if (Style == null || Message == null) return
 
@@ -44,7 +48,6 @@ function ShowNotification(Style, Message) {
         case "DBSaveUpdate":
             console.log(chalk.white("  ^- [" + TodayHours + ":" + TodayMinutes + ":" + TodaySeconds + "]") + chalk.green(" SYSTEM-UPDATE:") + chalk.white(Message))
             break
-
         case "ERROR":
             console.log(chalk.red("  ^-  [" + TodayHours + ":" + TodayMinutes + ":" + TodaySeconds + "] SYSTEM-UPDATE:" + Message))
             break
@@ -53,6 +56,8 @@ function ShowNotification(Style, Message) {
 }
 
 function SetCompleteNumber(number) {
+
+    //This function make that an number as 1 be "01"
 
     let numberComplete
 
@@ -71,6 +76,8 @@ function SetCompleteNumber(number) {
 
 async function AnalyzePrices(CurrentElementISOCode, CurrentElementPrice) {
 
+    //This function will analyze the current price with higher and lower price that must be in local in case don´t it take from DB
+
     let LastHigherPrices, LastLowerPrices
 
 
@@ -87,6 +94,12 @@ async function AnalyzePrices(CurrentElementISOCode, CurrentElementPrice) {
 
         LastLowerPrices = await GetLastHLPrice(CurrentElementISOCode, 'LowerPrice')
 
+    }
+
+    if(TodayHours == 0 && TodayMinutes == 0 && TodaySeconds < 4){
+        LastHigherPrices = 'Empty'
+        LastLowerPrices = 'Empty'
+        SF.ShowNotification('Normal', "  ^- The highest and lowest price have been reset at: " + TodayHours + ':' + TodayMinutes + ':' + TodaySeconds)
     }
 
     if (LastHigherPrices != 'Empty' && CurrentElementPrice > LastHigherPrices) {
@@ -109,6 +122,8 @@ async function AnalyzePrices(CurrentElementISOCode, CurrentElementPrice) {
 }
 
 function GetLastHLPrice(CurrentElementISOCode, CurrentElementType) {
+
+    //This function will return the Higher and Lower Price for be analyzed
 
     return new Promise((resolver, reject) => {
 
@@ -138,41 +153,63 @@ function GetLastHLPrice(CurrentElementISOCode, CurrentElementType) {
 
 }
 
-function UpdateDBData(CurrentElementISOCode, CurrentElementPrice, CurrentPathtoSave) {
+function UpdateDBData(CurrentElementISOCode, CurrentElementPrice, CurrentElementType, CurrentPathtoSave) {
+
+    //This function will save any data
 
     return new Promise((resolve, reject) => {
 
         if (CurrentElementISOCode == null || CurrentElementPrice == null || CurrentPathtoSave == null) reject('The data has been losted')
 
-        let DBRefToUpdate = db.ref('System/RealtimeData/Crypto/MXN/' + CurrentPathtoSave + '/')
-        let DBRefToUpdateCheck = db.ref('System/RealtimeData/Crypto/MXN/' + CurrentPathtoSave + '/' + CurrentElementISOCode)
+        let DBRefToUpdate = db.ref('System/RealtimeData/' + CurrentElementType + '/MXN/' + CurrentPathtoSave + '/')
 
         DBRefToUpdate.update({ [CurrentElementISOCode]: parseFloat(CurrentElementPrice) });
 
-        DBRefToUpdateCheck.once('value', (data) => {
+        resolve('Success')
 
-            let GlobalDataStateRef = db.ref('System/RealtimeStatus/Crypto/MXN/' + CurrentPathtoSave + '/' + CurrentElementISOCode)
+    })
+}
 
-            if (data.val() != null && data.val() == CurrentElementPrice) {
+function UpdateDBHistorial(CurrentElementType, CurrentElementISOCode, CurrentElementPrice, CurrentElementHPrice, CurrentElementLPrice) {
 
-                GlobalDataStateRef.update({ [CurrentElementISOCode]: 'Enable' });
-                resolve('Success')
+    //This function will save the historial Price of Crypto Assets
 
-            } else if (data.val() != null && data.val() != CurrentElementPrice) {
+    return new Promise((resolve, reject) => {
 
-                GlobalDataStateRef.update({ [CurrentElementISOCode]: 'UsingLast' });
-                resolve('Error')    
+        if (CurrentElementType == null || CurrentElementISOCode == null || CurrentElementPrice == null || CurrentElementHPrice == null || CurrentElementLPrice == null) reject('The data has been losted')
 
+        TodayHistorialState = HistorialDayState[CurrentElementISOCode]
+        let DBRefHistorial = db.ref('System/ForexRecords/' + CurrentElementType + '/' + CurrentElementISOCode + '/MXN/' + TodayYear + '/' + SetCompleteNumber(TodayMonth) + '/' + SetCompleteNumber(TodayDay) )
 
-            } else if (data.val() == null || data.val() == "") {
+        let ElementCreateOBJ = { "o":parseFloat(CurrentElementPrice), "h":parseFloat(CurrentElementHPrice), "l":parseFloat(CurrentElementLPrice), "c":parseFloat(CurrentElementPrice), "x": SetCompleteNumber(TodayDay) + " " + MonthsName[TodayMonth-1] + " " + TodayYear + " 00:00 GMT"}
+        let ElementUpdateOBJ = { "h":parseFloat(CurrentElementHPrice), "l":parseFloat(CurrentElementLPrice), "c":parseFloat(CurrentElementPrice)}
 
-                GlobalDataStateRef.update({ [CurrentElementISOCode]: 'Disble' });
-                resolve('Error')
+        if(TodayHours == 0 && TodayMinutes == 0 && TodaySeconds < 4){TodayHistorialState = null}
 
-            }
+        if(TodayHistorialState == null){   
+            
+            DBRefHistorial.once('value', (data) => {
 
+                if (data.val() != null) {
 
-        });
+                    Object.defineProperty(HistorialDayState, CurrentElementISOCode, { value: 'Created', writable: true, enumerable: true })
+                    DBRefHistorial.update(ElementUpdateOBJ)
+                    resolve('SuccessUpd')
+    
+                } else {
+                    Object.defineProperty(HistorialDayState, CurrentElementISOCode, { value: 'Created', writable: true, enumerable: true })
+                    DBRefHistorial.update(ElementCreateOBJ)
+                    resolve('SuccessCre')
+                }
+    
+            })
+
+        }else{
+
+            DBRefHistorial.update(ElementUpdateOBJ)
+            resolve('SuccessUpd')
+            
+        }        
 
     })
 }
@@ -182,6 +219,8 @@ module.exports = {
     "ShowNotification": ShowNotification,
     "SetCompleteNumber": SetCompleteNumber,
     "AnalyzePrices": AnalyzePrices,
-    "UpdateDBData": UpdateDBData
+    "UpdateDBData": UpdateDBData,
+    "UpdateDBHistorial":UpdateDBHistorial,
+    "HistorialDayState":HistorialDayState
 
 }

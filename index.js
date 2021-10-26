@@ -25,6 +25,8 @@ let HigherPricesOBJ = {};
 
 function LoadPayAllSystem() {
 
+    //This function will print the presentation info
+
     SF.ShowNotification('Enter', 'Enter')
     SF.ShowNotification('Enter', 'Enter')
     SF.ShowNotification('SystemStyle', "██████╗  █████╗ ██╗   ██╗ █████╗ ██╗     ██╗     ")
@@ -79,6 +81,8 @@ function LoadPayAllSystem() {
 
 function initClock(State) {
 
+    //This function will get the current Time and date and it will be updated each second
+
     let ClockDate = new Date()
 
     TodayYear = ClockDate.getFullYear()
@@ -95,19 +99,51 @@ function initClock(State) {
         SF.ShowNotification('Normal', "  ^- The clock has been initialized successfully at: " + TodayHours + ':' + TodayMinutes + ':' + TodaySeconds)
     }
 
-    if (TodayHours == 23 && TodayMinutes == 59 && TodaySeconds == 59) {
+    if (TodayHours == 0 || TodayHours == 6 || TodayHours == 12 || TodayHours == 18) {
+
+        //When the current time be = 0,6,12,18 (24H System) will get the current Price of currencies as USD and EUR
+
+        if (TodayMinutes == 0 && TodaySeconds == 1) {
+
+            let CurrencysURLS = ["https://www.google.com/finance/quote/USD-MXN", "https://www.google.com/finance/quote/EUR-MXN"]
+
+            for (let c = 0; c < CurrencysURLS.length; c++) {
+
+                const CurrentURL = CurrencysURLS[c]
+                const CurrentElement = CurrentURL.substring(37, 40)
+
+                request(CurrentURL, (error, response, html) => {
+
+                    if (!error && response.statusCode == 200) {
+
+                        const $ = cheerio.load(html)
+
+                        let data = html.split('YMlKec fxKbKc')
+
+                        let ActualCurrency = data[1].substring(2, 9)
+
+                        SF.UpdateDBData(CurrentElement, ActualCurrency, 'Currency', 'Price').then((response) => {
+
+                            if (response == 'Success') {
+
+                                ShowNotification('NormalUpdateCoinGeck', ' The ' + CurrentElement + ' Price has been updated sucessfully')
+
+                            } else if (response == 'Error') {
+
+                                ShowNotification('ERROR', ' ERROR with ' + CurrentElement + ' Price has not been updated sucessfully')
+
+                            }
+
+                        })
 
 
-        let LowerPricesOBJ = {};
-        let HigherPricesOBJ = {};
-        saveNewHLPrice()
-        SF.ShowNotification('Normal', "  ^- The highest and lowest price have been reset at: " + TodayHours + ':' + TodayMinutes + ':' + TodaySeconds)
+                    }
 
-    }
+                })
 
-    if (TodayHours == 0 || 6 || 12 || 18 && TodayMinutes == 1 && TodaySeconds > 5) {
+            }
 
-        //Load and save the current Price of Currencies (USD, EUR)
+        }
 
     }
 
@@ -116,6 +152,8 @@ function initClock(State) {
 }
 
 function SetFirebaseConexion() {
+
+    //This function will create the conexion to firebase DB
 
     return new Promise((resolve, reject) => {
 
@@ -130,6 +168,8 @@ function SetFirebaseConexion() {
 }
 
 function GetAssetsEnable() {
+
+    //This function get the current enable currencies and Crypto - Crypto-ID´s
 
     let GlobalDataRef = db.ref('System/GlobalData/ActiveElements')
 
@@ -165,6 +205,8 @@ function GetAssetsEnable() {
 
 var CheckConnectionCoinGeckoClient = async () => {
 
+    //This function check the ping in the CoinGeckoClient
+
     let ServerResponse = await CoinGeckoClient.ping();
 
     return new Promise((resolve, reject) => {
@@ -178,6 +220,8 @@ var CheckConnectionCoinGeckoClient = async () => {
 }
 
 var GetCryptoData = async () => {
+
+    //This function get data from the CoinGecko Client and process for be saved later
 
     try {
 
@@ -217,15 +261,15 @@ var GetCryptoData = async () => {
 
                     //Now we save the Current Price then
 
-                    SF.UpdateDBData(CurrentElementISOCode, CurrentElementPrice, 'Price').then((response) => {
+                    SF.UpdateDBData(CurrentElementISOCode, CurrentElementPrice, 'Crypto', 'Price').then((response) => {
 
                         if (response == 'Success') {
 
-                            ShowNotification('DBSaveUpdate', ' The ' + CurrentElementISOCode + ' Price has been uptaded sucessfully')
+                            ShowNotification('DBSaveUpdate', ' The ' + CurrentElementISOCode + ' Price has been updated sucessfully')
 
                         } else if (response == 'Error') {
 
-                            ShowNotification('ERROR', ' ERROR with ' + CurrentElementISOCode + ' Price has not been uptaded sucessfully')
+                            ShowNotification('ERROR', ' ERROR with ' + CurrentElementISOCode + ' Price has not been updated sucessfully')
 
                         }
 
@@ -233,15 +277,15 @@ var GetCryptoData = async () => {
 
                     //The Higher Price then
 
-                    SF.UpdateDBData(CurrentElementISOCode, HigherPricesAA, 'HigherPrice').then((response) => {
+                    SF.UpdateDBData(CurrentElementISOCode, HigherPricesAA, 'Crypto', 'HigherPrice').then((response) => {
 
                         if (response == 'Success') {
 
-                            ShowNotification('DBSaveUpdate', ' The ' + CurrentElementISOCode + ' HigherPrice has been uptaded sucessfully')
+                            ShowNotification('DBSaveUpdate', ' The ' + CurrentElementISOCode + ' HigherPrice has been updated sucessfully')
 
                         } else if (response == 'Error') {
 
-                            ShowNotification('ERROR', ' ERROR with ' + CurrentElementISOCode + ' HigherPrice has not been uptaded sucessfully')
+                            ShowNotification('ERROR', ' ERROR with ' + CurrentElementISOCode + ' HigherPrice has not been updated sucessfully')
 
                         }
 
@@ -249,15 +293,15 @@ var GetCryptoData = async () => {
 
                     //The Lower Price then
 
-                    SF.UpdateDBData(CurrentElementISOCode, LowerPricesAA, 'LowerPrice').then((response) => {
+                    SF.UpdateDBData(CurrentElementISOCode, LowerPricesAA, 'Crypto', 'LowerPrice').then((response) => {
 
                         if (response == 'Success') {
 
-                            ShowNotification('DBSaveUpdate', ' The ' + CurrentElementISOCode + ' LowerPrice has been uptaded sucessfully')
+                            ShowNotification('DBSaveUpdate', ' The ' + CurrentElementISOCode + ' LowerPrice has been updated sucessfully')
 
                         } else if (response == 'Error') {
 
-                            ShowNotification('ERROR', ' ERROR with ' + CurrentElementISOCode + ' LowerPrice has not been uptaded sucessfully')
+                            ShowNotification('ERROR', ' ERROR with ' + CurrentElementISOCode + ' LowerPrice has not been updated sucessfully')
 
                         }
 
@@ -265,15 +309,15 @@ var GetCryptoData = async () => {
 
                     //The 24 Change Price then
 
-                    SF.UpdateDBData(CurrentElementISOCode, CurrentElement24Change, 'Change').then((response) => {
+                    SF.UpdateDBData(CurrentElementISOCode, CurrentElement24Change, 'Crypto', 'Change').then((response) => {
 
                         if (response == 'Success') {
 
-                            ShowNotification('DBSaveUpdate', ' The ' + CurrentElementISOCode + ' Change has been uptaded sucessfully')
+                            ShowNotification('DBSaveUpdate', ' The ' + CurrentElementISOCode + ' Change has been updated sucessfully')
 
                         } else if (response == 'Error') {
 
-                            ShowNotification('ERROR', ' ERROR with ' + CurrentElementISOCode + ' Change has not been uptaded sucessfully')
+                            ShowNotification('ERROR', ' ERROR with ' + CurrentElementISOCode + ' Change has not been updated sucessfully')
 
                         }
 
@@ -281,15 +325,15 @@ var GetCryptoData = async () => {
 
                     //The MarketCap Price then
 
-                    SF.UpdateDBData(CurrentElementISOCode, CurrentElementMarketCap, 'MarketCap').then((response) => {
+                    SF.UpdateDBData(CurrentElementISOCode, CurrentElementMarketCap, 'Crypto', 'MarketCap').then((response) => {
 
                         if (response == 'Success') {
 
-                            ShowNotification('DBSaveUpdate', ' The ' + CurrentElementISOCode + ' MarketCap has been uptaded sucessfully')
+                            ShowNotification('DBSaveUpdate', ' The ' + CurrentElementISOCode + ' MarketCap has been updated sucessfully')
 
                         } else if (response == 'Error') {
 
-                            ShowNotification('ERROR', ' ERROR with ' + CurrentElementISOCode + ' MarketCap has not been uptaded sucessfully')
+                            ShowNotification('ERROR', ' ERROR with ' + CurrentElementISOCode + ' MarketCap has not been updated sucessfully')
 
                         }
 
@@ -297,21 +341,35 @@ var GetCryptoData = async () => {
 
                     //The 24 Volumen then
 
-                    SF.UpdateDBData(CurrentElementISOCode, CurrentElement24Vol, 'Volumen').then((response) => {
+                    SF.UpdateDBData(CurrentElementISOCode, CurrentElement24Vol, 'Crypto', 'Volumen').then((response) => {
 
                         if (response == 'Success') {
 
-                            ShowNotification('DBSaveUpdate', ' The ' + CurrentElementISOCode + ' Volumen has been uptaded sucessfully')
+                            ShowNotification('DBSaveUpdate', ' The ' + CurrentElementISOCode + ' Volumen has been updated sucessfully')
 
                         } else if (response == 'Error') {
 
-                            ShowNotification('ERROR', ' ERROR with ' + CurrentElementISOCode + ' Volumen has not been uptaded sucessfully')
+                            ShowNotification('ERROR', ' ERROR with ' + CurrentElementISOCode + ' Volumen has not been updated sucessfully')
 
                         }
 
                     })
 
                     //The Historial Data
+
+                    SF.UpdateDBHistorial('Crypto', CurrentElementISOCode, CurrentElementPrice, HigherPricesAA, LowerPricesAA).then((response) => {
+
+                        if (response == 'SuccessUpd') {
+
+                            ShowNotification('DBSaveUpdate', ' The ' + CurrentElementISOCode + ' Historial has been updated sucessfully')
+
+                        } else if (response == 'SuccessCre') {
+
+                            ShowNotification('DBSaveUpdate', ' The ' + CurrentElementISOCode + ' Historial has been created sucessfully')
+
+                        }
+
+                    })
 
                     ShowNotification('Enter', 'Space between CryptoCurrencies')
 
@@ -324,16 +382,16 @@ var GetCryptoData = async () => {
 
             }
 
-        }else{
+            setTimeout(GetCryptoData, 3000)
 
-            SF.ShowNotification('Error', 'CoinGeckoClient Response is NULL')    
+        } else {
+
+            SF.ShowNotification('Error', 'CoinGeckoClient Response is NULL')
 
         }
 
-        //setTimeout(GetAgain, 3000);
-
     } catch (error) {
-        SF.ShowNotification('Error', error)
+        SF.ShowNotification('Error', 'CoinGeckoClient ERROR: ' + error)
     }
 
 }
