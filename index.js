@@ -36,7 +36,7 @@ function LoadPayAllSystem() {
     SF.ShowNotification('SystemStyle', "██║     ██║  ██║   ██║   ██║  ██║███████╗███████╗")
     SF.ShowNotification('SystemStyle', "╚═╝     ╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝╚══════╝╚══════╝")
     SF.ShowNotification('Enter', 'Enter')
-    SF.ShowNotification('SystemStyle', "Payall System Crypto Prices Collector System - Version: 2.2.0 ( 26 Oct 2021 )")
+    SF.ShowNotification('SystemStyle', "PayAll Asset Price Collector System (Crypto and Currencies) - Version: 2.2.0 ( 26 Oct 2021 )")
     SF.ShowNotification('Enter', 'Enter')
     SF.ShowNotification('SystemTitleStyle', " ****************** Initializing Global Functions")
 

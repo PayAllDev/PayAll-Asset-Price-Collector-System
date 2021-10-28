@@ -184,7 +184,13 @@ function UpdateDBHistorial(CurrentElementType, CurrentElementISOCode, CurrentEle
         let ElementCreateOBJ = { "o":parseFloat(CurrentElementPrice), "h":parseFloat(CurrentElementHPrice), "l":parseFloat(CurrentElementLPrice), "c":parseFloat(CurrentElementPrice), "x": SetCompleteNumber(TodayDay) + " " + MonthsName[TodayMonth-1] + " " + TodayYear + " 00:00 GMT"}
         let ElementUpdateOBJ = { "h":parseFloat(CurrentElementHPrice), "l":parseFloat(CurrentElementLPrice), "c":parseFloat(CurrentElementPrice)}
 
-        if(TodayHours == 0 && TodayMinutes == 0 && TodaySeconds < 4){TodayHistorialState = null}
+        if(TodayHours == 0 && TodayMinutes == 0 && TodaySeconds < 4){
+            TodayHistorialState = null
+            HistorialDayState = {}
+            Object.defineProperty(HistorialDayState, CurrentElementISOCode, { value: 'Created', writable: true, enumerable: true })
+            DBRefHistorial.update(ElementCreateOBJ)
+            resolve('SuccessCre')
+        }
 
         if(TodayHistorialState == null){   
             
@@ -221,6 +227,5 @@ module.exports = {
     "AnalyzePrices": AnalyzePrices,
     "UpdateDBData": UpdateDBData,
     "UpdateDBHistorial":UpdateDBHistorial,
-    "HistorialDayState":HistorialDayState
 
 }

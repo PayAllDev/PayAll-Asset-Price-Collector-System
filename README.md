@@ -1,17 +1,25 @@
-# PayAll System Assets Data Collector System
+# PayAll Asset Price Collector System (Crypto and Currencies)
 
-Resumen:
-Este Script Obtendra multiples datos de las criptomonedas y las guardara en la base de datos.
 
-(El precio de las criptomonedas solo es para referencia, no debe ser el mismo que el precio de mercado)
+![https://www.payall.com.mx/](https://www.payall.com.mx/public_resources/images/PayAll-Big-Capture.png)
 
-Explicacion Completa:
+Este sistema obtendrá múltiples datos de Criptomonedas y Divisas.
 
-Este script obtendrá múltiples datos de las criptomonedas que se han establecido desde index.js
 
-Criptomonedas Activadas actualmente:
+## Criptomonedas Activas al momento de lanzamiento:
 
-Bitcoin Ethereum Ripple Litecoin Bitcoin-Cash Dogecoin Cardano Monero Shiba-Inu Dai True-USD
+
+•	Bitcoin
+•	Ethereum
+•	Ripple
+•	Litecoin
+•	Bitcoin-Cash
+•	Dogecoin
+•	Cardano
+•	Monero
+•	Shiba-Inu
+•	Dai
+•	True-US
 
 Los datos que obtendrá son:
 
@@ -20,13 +28,19 @@ Los datos que obtendrá son:
 	•Capitalización en Mercado
 	•Cambio de las últimas 24 horas
 
-Adicionalmente comparara los precios actuales con los precios mas bajos y altos para guardarlos en la base de datos.
+Adicionalmente el sistema compara el precio actual con el precio mas alto y bajo para después ser guardados en la base de datos.
+-	En caso de que no existan registros de precio mas alto y bajo se buscaran en la base de datos y nuevamente en caso de que estos no existan se registraran
 
-Tambien obtendrá los precios del dólar estadounidense (USD) y euro (EUR) en pesos mexicanos y los guardará en la base de datos
+También se obtendrán los precios de divisas como el Dólar Estadounidense (USD) y el Euro (EUR) en Peso Mexicano (MXN) y se guardarán en la base de datos.
 
-(Estos precios deberán de ser solamente para referencia y no para usarse como precio de mercado)
 
-En esta versión el script ha sido convertido en .exe para funcionar como programa y trabajar en segundo plano.
+# Estos precios deberán de ser solamente para referencia y no para usarse como precio de mercado.
+
+
+### En esta versión el script ha sido convertido en .exe para funcionar como programa y trabajar en segundo plano, .exe no se encuentra en le repositorio, para convertir el proyecto en .exe use pkg index.js
+
+
+
 
 
 	██████╗  █████╗ ██╗   ██╗ █████╗ ██╗     ██╗     
@@ -70,3 +84,4 @@ En esta versión el script ha sido convertido en .exe para funcionar como progra
 	                    `!9899fT|!^"'
 	                      `!^"'
                                                  
+																							Created by Armando Peralta
