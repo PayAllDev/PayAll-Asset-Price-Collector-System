@@ -4,7 +4,7 @@
 -- @Author: Armando Peralta
 -- @Version: 2.2.0
 -- @Date: 01/10/2021
--- @Last Modification Date: 20/10/2021
+-- @Last Modification Date: 29/10/2021
 -- @Description: This file will create the conexion between Coingeck-API and or DB
 -- @Programming Language: Javascript
 
