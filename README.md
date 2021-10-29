@@ -84,4 +84,4 @@ También se obtendrán los precios de divisas como el Dólar Estadounidense (USD
 	                    `!9899fT|!^"'
 	                      `!^"'
                                                  
-																							Created by Armando Peralta
+																			Created by Armando Peralta
