@@ -10,10 +10,10 @@
 
 */
 
+let MonthsName = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 let LowerPricesOBJ = {};
 let HigherPricesOBJ = {};
 let HistorialDayState = {};
-let MonthsName = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
 const chalk = require('chalk');
 
@@ -94,13 +94,7 @@ async function AnalyzePrices(CurrentElementISOCode, CurrentElementPrice) {
 
         LastLowerPrices = await GetLastHLPrice(CurrentElementISOCode, 'LowerPrice')
 
-    }
-
-    if(TodayHours == 0 && TodayMinutes == 0 && TodaySeconds < 4){
-        LastHigherPrices = 'Empty'
-        LastLowerPrices = 'Empty'
-        SF.ShowNotification('Normal', "  ^- The highest and lowest price have been reset at: " + TodayHours + ':' + TodayMinutes + ':' + TodaySeconds)
-    }
+    }    
 
     if (LastHigherPrices != 'Empty' && CurrentElementPrice > LastHigherPrices) {
         LastHigherPrices = CurrentElementPrice
@@ -179,21 +173,13 @@ function UpdateDBHistorial(CurrentElementType, CurrentElementISOCode, CurrentEle
         if (CurrentElementType == null || CurrentElementISOCode == null || CurrentElementPrice == null || CurrentElementHPrice == null || CurrentElementLPrice == null) reject('The data has been losted')
 
         TodayHistorialState = HistorialDayState[CurrentElementISOCode]
-        let DBRefHistorial = db.ref('System/ForexRecords/' + CurrentElementType + '/' + CurrentElementISOCode + '/MXN/' + TodayYear + '/' + SetCompleteNumber(TodayMonth) + '/' + SetCompleteNumber(TodayDay) )
+        let DBRefHistorial = db.ref('System/ForexRecords/' + CurrentElementType + '/' + CurrentElementISOCode + '/MXN/' + TodayYear + '/' + SetCompleteNumber(TodayMonth) + '/' + SetCompleteNumber(TodayDay))
 
-        let ElementCreateOBJ = { "o":parseFloat(CurrentElementPrice), "h":parseFloat(CurrentElementHPrice), "l":parseFloat(CurrentElementLPrice), "c":parseFloat(CurrentElementPrice), "x": SetCompleteNumber(TodayDay) + " " + MonthsName[TodayMonth-1] + " " + TodayYear + " 00:00 GMT"}
-        let ElementUpdateOBJ = { "h":parseFloat(CurrentElementHPrice), "l":parseFloat(CurrentElementLPrice), "c":parseFloat(CurrentElementPrice)}
+        let ElementCreateOBJ = { "o": parseFloat(CurrentElementPrice), "h": parseFloat(CurrentElementHPrice), "l": parseFloat(CurrentElementLPrice), "c": parseFloat(CurrentElementPrice), "x": SetCompleteNumber(TodayDay) + " " + MonthsName[TodayMonth - 1] + " " + TodayYear + " 00:00 GMT" }
+        let ElementUpdateOBJ = { "h": parseFloat(CurrentElementHPrice), "l": parseFloat(CurrentElementLPrice), "c": parseFloat(CurrentElementPrice) }
 
-        if(TodayHours == 0 && TodayMinutes == 0 && TodaySeconds < 4){
-            TodayHistorialState = null
-            HistorialDayState = {}
-            Object.defineProperty(HistorialDayState, CurrentElementISOCode, { value: 'Created', writable: true, enumerable: true })
-            DBRefHistorial.update(ElementCreateOBJ)
-            resolve('SuccessCre')
-        }
+        if (TodayHistorialState == null) {
 
-        if(TodayHistorialState == null){   
-            
             DBRefHistorial.once('value', (data) => {
 
                 if (data.val() != null) {
@@ -201,23 +187,66 @@ function UpdateDBHistorial(CurrentElementType, CurrentElementISOCode, CurrentEle
                     Object.defineProperty(HistorialDayState, CurrentElementISOCode, { value: 'Created', writable: true, enumerable: true })
                     DBRefHistorial.update(ElementUpdateOBJ)
                     resolve('SuccessUpd')
-    
+
                 } else {
                     Object.defineProperty(HistorialDayState, CurrentElementISOCode, { value: 'Created', writable: true, enumerable: true })
                     DBRefHistorial.update(ElementCreateOBJ)
                     resolve('SuccessCre')
                 }
-    
+
             })
 
-        }else{
+        } else {
 
             DBRefHistorial.update(ElementUpdateOBJ)
             resolve('SuccessUpd')
-            
-        }        
+
+        }
 
     })
+}
+
+function SaveNewHistorialData(CurrentElementISOCode, CurrentElementPrice, CurrentElementType) {
+
+    return new Promise((resolve, reject) => {
+
+        if(CurrentElementISOCode == null || CurrentElementPrice == null || CurrentElementType == null) reject('Data lost')
+
+        let DBRefNewHistorial = db.ref('System/ForexRecords/' + CurrentElementType + '/' + CurrentElementISOCode + '/MXN/' + TodayYear + '/' + SetCompleteNumber(TodayMonth) + '/' + SetCompleteNumber(TodayDay))
+
+        let NewElementHistorialOBJ = { 
+            "o": parseFloat(CurrentElementPrice), 
+            "h": parseFloat(CurrentElementPrice), 
+            "l": parseFloat(CurrentElementPrice), 
+            "c": parseFloat(CurrentElementPrice), 
+            "x": SetCompleteNumber(TodayDay) + " " + MonthsName[TodayMonth - 1] + " " + TodayYear + " 00:00 GMT" 
+        }
+
+        DBRefNewHistorial.update(NewElementHistorialOBJ)
+
+        Object.defineProperty(HistorialDayState, CurrentElementISOCode, { value: 'Created', writable: true, enumerable: true })
+        resolve('Success')
+
+    })
+
+}
+
+function SetNewHLPrices(CurrentElementISOCode, CurrentElementPrice, CurrentElementType) {
+
+    return new Promise((resolve, reject) => {
+
+        if(CurrentElementISOCode == null || CurrentElementPrice == null || CurrentElementType == null) reject('Data lost')
+
+        let DBRefHigherPrice = db.ref('System/RealtimeData/' + CurrentElementType + '/MXN/HigherPrice/')
+        let DBRefLowerPrice = db.ref('System/RealtimeData/' + CurrentElementType + '/MXN/LowerPrice/')
+
+        DBRefHigherPrice.update({ [CurrentElementISOCode]: parseFloat(CurrentElementPrice) });
+        DBRefLowerPrice.update({ [CurrentElementISOCode]: parseFloat(CurrentElementPrice) });
+
+        resolve('Success')
+
+    })
+
 }
 
 module.exports = {
@@ -226,6 +255,11 @@ module.exports = {
     "SetCompleteNumber": SetCompleteNumber,
     "AnalyzePrices": AnalyzePrices,
     "UpdateDBData": UpdateDBData,
-    "UpdateDBHistorial":UpdateDBHistorial,
+    "UpdateDBHistorial": UpdateDBHistorial,
+    "SaveNewHistorialData":SaveNewHistorialData,
+    "SetNewHLPrices":SetNewHLPrices,
+    "LowerPricesOBJ":LowerPricesOBJ,
+    "HigherPricesOBJ":HigherPricesOBJ,
+    "HistorialDayState":HistorialDayState
 
 }
