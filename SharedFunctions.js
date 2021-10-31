@@ -121,7 +121,7 @@ function GetLastHLPrice(CurrentElementISOCode, CurrentElementType) {
 
     return new Promise((resolver, reject) => {
 
-        let DBRef = db.ref('System/RealtimeData/Crypto/MXN/' + CurrentElementType + '/' + CurrentElementISOCode)
+        let DBRef = db.ref('YOUR_DB_PATH/Crypto/MXN/' + CurrentElementType + '/' + CurrentElementISOCode)
 
         DBRef.once('value', (data) => {
 
@@ -155,7 +155,7 @@ function UpdateDBData(CurrentElementISOCode, CurrentElementPrice, CurrentElement
 
         if (CurrentElementISOCode == null || CurrentElementPrice == null || CurrentPathtoSave == null) reject('The data has been losted')
 
-        let DBRefToUpdate = db.ref('System/RealtimeData/' + CurrentElementType + '/MXN/' + CurrentPathtoSave + '/')
+        let DBRefToUpdate = db.ref('YOUR_DB_PATH/' + CurrentElementType + '/MXN/' + CurrentPathtoSave + '/')
 
         DBRefToUpdate.update({ [CurrentElementISOCode]: parseFloat(CurrentElementPrice) });
 
@@ -242,8 +242,8 @@ function SetNewHLPrices(CurrentElementISOCode, CurrentElementPrice, CurrentEleme
         HigherPricesOBJ = {}
         LowerPricesOBJ = {}
 
-        let DBRefHigherPrice = db.ref('System/RealtimeData/' + CurrentElementType + '/MXN/HigherPrice/')
-        let DBRefLowerPrice = db.ref('System/RealtimeData/' + CurrentElementType + '/MXN/LowerPrice/')
+        let DBRefHigherPrice = db.ref('YOUR_DB_PATH/' + CurrentElementType + '/MXN/HigherPrice/')
+        let DBRefLowerPrice = db.ref('YOUR_DB_PATH/' + CurrentElementType + '/MXN/LowerPrice/')
 
         DBRefHigherPrice.update({ [CurrentElementISOCode]: parseFloat(CurrentElementPrice) });
         DBRefLowerPrice.update({ [CurrentElementISOCode]: parseFloat(CurrentElementPrice) });
