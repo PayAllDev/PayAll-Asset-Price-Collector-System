@@ -2,7 +2,7 @@
 
 -- PayAll System
 -- @Author: Armando Peralta
--- @Version: 2.2.0
+-- @Version: 2.2.1
 -- @Date: 24/10/2021
 -- @Last Modification Date: 30/10/2021
 -- @Description: This file will create the conexion between Coingeck-API and or DB
