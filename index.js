@@ -156,7 +156,8 @@ function SetFirebaseConexion() {
     return new Promise((resolve, reject) => {
 
         var serviceAccount = require("./pa_sdk_key.json");
-        admin.initializeApp({ credential: admin.credential.cert(serviceAccount), databaseURL: "https://payall-p404-default-rtdb.firebaseio.com" });
+        //admin.initializeApp({ credential: admin.credential.cert(serviceAccount), databaseURL: "https://payall-p404-default-rtdb.firebaseio.com" });
+        admin.initializeApp({ credential: admin.credential.cert(serviceAccount), databaseURL: "https://payall-p404-dev-default-rtdb.firebaseio.com/" });
         db = admin.database();
         resolve('The firebase conecction has been crated succesfully')
 
@@ -278,7 +279,7 @@ var GetCryptoData = async () => {
         if (ServerResponse != '' || null) {
 
             SF.ShowNotification('Enter', 'Space between Last and CUrrent CoinGeckoClient Response')
-            SF.ShowNotification('NormalUpdateCoinGeck', 'CoinGecko Client Response has responded correctly')
+            SF.ShowNotification('NormalUpdateCoinGeck', 'CoinGecko Client has responded')
 
             ServerResponseData = ServerResponse.data
 
@@ -294,6 +295,23 @@ var GetCryptoData = async () => {
                 const CurrentElementMarketCap = CurrentElementDataResponse['mxn_market_cap']
                 const CurrentElement24Vol = CurrentElementDataResponse['mxn_24h_vol']
                 const CurrentElement24Change = CurrentElementDataResponse['mxn_24h_change']
+
+                if (CurrentElementPrice == null) {
+
+                    SF.ShowNotification('ERROR', 'The CoinGecko Client Data is not correct')
+                    // If the system detect that the current time is lower that 0:00:05 then save the data as new else keep workin each 3 seconds
+
+                    if (TodayHours == 0 && TodayMinutes == 0 && TodaySeconds <= 5) {
+
+                        CreateNewData()
+
+                    } else {
+
+                        setTimeout(GetCryptoData, 3000)
+
+                    }
+                    return
+                }
 
                 try {
 
@@ -431,28 +449,27 @@ var GetCryptoData = async () => {
             }
 
 
-            // If the system detect that the current time is lower that 0:00:05 then save the data as new else keep workin each 3 seconds
-
-            if (TodayHours == 0 && TodayMinutes == 0 && TodaySeconds <= 5) {
-
-                CreateNewData()
-
-            } else {
-
-                setTimeout(GetCryptoData, 3000)
-
-            }
-
-
         } else {
 
-            SF.ShowNotification('Error', 'CoinGeckoClient Response is NULL')
+            SF.ShowNotification('ERROR', 'CoinGeckoClient Response is NULL')
 
         }
 
     } catch (error) {
 
-        SF.ShowNotification('Error', 'CoinGeckoClient ERROR: ' + error)
+        SF.ShowNotification('ERROR', 'CoinGeckoClient ERROR: ' + error)
+
+    }
+
+    // If the system detect that the current time is lower that 0:00:05 then save the data as new else keep workin each 3 seconds
+
+    if (TodayHours == 0 && TodayMinutes == 0 && TodaySeconds <= 5) {
+
+        CreateNewData()
+
+    } else {
+
+        setTimeout(GetCryptoData, 3000)
 
     }
 

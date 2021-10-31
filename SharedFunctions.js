@@ -49,7 +49,7 @@ function ShowNotification(Style, Message) {
             console.log(chalk.white("  ^- [" + TodayHours + ":" + TodayMinutes + ":" + TodaySeconds + "]") + chalk.green(" SYSTEM-UPDATE:") + chalk.white(Message))
             break
         case "ERROR":
-            console.log(chalk.red("  ^-  [" + TodayHours + ":" + TodayMinutes + ":" + TodaySeconds + "] SYSTEM-UPDATE:" + Message))
+            console.log(chalk.red("  ^- [" + TodayHours + ":" + TodayMinutes + ":" + TodaySeconds + "] SYSTEM-UPDATE:" + Message))
             break
 
     }
