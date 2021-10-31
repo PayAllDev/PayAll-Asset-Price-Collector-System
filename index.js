@@ -155,7 +155,7 @@ function SetFirebaseConexion() {
 
     return new Promise((resolve, reject) => {
 
-        var serviceAccount = require("./pa_sdk_key.json");
+        var serviceAccount = require("_-YOUR CREDENTIALS FILE-_");
         admin.initializeApp({ credential: admin.credential.cert(serviceAccount), databaseURL: "_-YOUR DATABASE URL-_" });
         db = admin.database();
         resolve('The firebase conecction has been crated succesfully')
