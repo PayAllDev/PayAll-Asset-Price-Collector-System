@@ -34,7 +34,7 @@ function LoadPayAllSystem() {
     SF.ShowNotification('SystemStyle', "██║     ██║  ██║   ██║   ██║  ██║███████╗███████╗")
     SF.ShowNotification('SystemStyle', "╚═╝     ╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝╚══════╝╚══════╝")
     SF.ShowNotification('Enter', 'Enter')
-    SF.ShowNotification('SystemStyle', "PayAll Asset Price Collector System (Crypto and Currencies) - Version: 2.2.0 ( 30 Oct 2021 )")
+    SF.ShowNotification('SystemStyle', "PayAll Asset Price Collector System (Crypto and Currencies) - Version: 2.2.1 ( 30 Oct 2021 )")
     SF.ShowNotification('Enter', 'Enter')
     SF.ShowNotification('SystemTitleStyle', " ****************** Initializing Global Functions")
 
@@ -157,7 +157,6 @@ function SetFirebaseConexion() {
 
         var serviceAccount = require("./pa_sdk_key.json");
         admin.initializeApp({ credential: admin.credential.cert(serviceAccount), databaseURL: "https://payall-p404-default-rtdb.firebaseio.com" });
-        //admin.initializeApp({ credential: admin.credential.cert(serviceAccount), databaseURL: "https://payall-p404-dev-default-rtdb.firebaseio.com" });
         db = admin.database();
         resolve('The firebase conecction has been crated succesfully')
 

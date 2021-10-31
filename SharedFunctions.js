@@ -212,6 +212,8 @@ function SaveNewHistorialData(CurrentElementISOCode, CurrentElementPrice, Curren
 
         if(CurrentElementISOCode == null || CurrentElementPrice == null || CurrentElementType == null) reject('Data lost')
 
+        HistorialDayState = {}
+
         let DBRefNewHistorial = db.ref('System/ForexRecords/' + CurrentElementType + '/' + CurrentElementISOCode + '/MXN/' + TodayYear + '/' + SetCompleteNumber(TodayMonth) + '/' + SetCompleteNumber(TodayDay))
 
         let NewElementHistorialOBJ = { 
@@ -236,6 +238,9 @@ function SetNewHLPrices(CurrentElementISOCode, CurrentElementPrice, CurrentEleme
     return new Promise((resolve, reject) => {
 
         if(CurrentElementISOCode == null || CurrentElementPrice == null || CurrentElementType == null) reject('Data lost')
+
+        HigherPricesOBJ = {}
+        LowerPricesOBJ = {}
 
         let DBRefHigherPrice = db.ref('System/RealtimeData/' + CurrentElementType + '/MXN/HigherPrice/')
         let DBRefLowerPrice = db.ref('System/RealtimeData/' + CurrentElementType + '/MXN/LowerPrice/')
